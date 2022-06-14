@@ -1,6 +1,8 @@
 package com.community.server.entity;
 
 import com.community.server.enums.TypeFile;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
@@ -9,6 +11,8 @@ import java.io.FileWriter;
 import java.util.Date;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "files")
 public class FileEntity {
 
@@ -24,48 +28,12 @@ public class FileEntity {
     @CreatedDate
     private Date created;
 
-    private TypeFile type_file;
+    private TypeFile typeFile;
 
-    public FileEntity(String file, Long author, Date created, TypeFile type_file) {
+    public FileEntity(String file, Long author, Date created, TypeFile typeFile) {
         this.file = file;
         this.author = author;
         this.created = created;
-        this.type_file = type_file;
-    }
-
-    public String getFile() {
-        return file;
-    }
-
-    public void setFile(String file) {
-        this.file = file;
-    }
-
-    public TypeFile getType_file() {
-        return type_file;
-    }
-
-    public void setType_file(TypeFile type_file) {
-        this.type_file = type_file;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public Long getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(Long author) {
-        this.author = author;
-    }
-
-    public Date getCreated() {
-        return created;
-    }
-
-    public void setCreated(Date created) {
-        this.created = created;
+        this.typeFile = typeFile;
     }
 }

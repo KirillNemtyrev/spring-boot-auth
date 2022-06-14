@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService implements UserDetailsService {
 
     @Autowired
-    UserRepository userRepository;
+    public UserRepository userRepository;
 
     @Override
     @Transactional
@@ -25,7 +25,6 @@ public class UserService implements UserDetailsService {
         return UserPrincipal.create(user);
     }
 
-    // This method is used by JWTAuthenticationFilter
     @Transactional
     public UserDetails loadUserById(Long id) {
         UserEntity user = userRepository.findById(id)

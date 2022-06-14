@@ -1,7 +1,10 @@
 package com.community.server.payload;
 
+import lombok.Getter;
+
 import javax.validation.constraints.NotBlank;
 
+@Getter
 public class SupportRequest {
     @NotBlank
     private String email;
@@ -11,16 +14,4 @@ public class SupportRequest {
 
     @NotBlank
     private String message;
-
-    public String getMessage() {
-        return message;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getEmail() {
-        return email;
-    }
 }

@@ -77,34 +77,7 @@ public class UserController {
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(
                 () -> new UsernameNotFoundException("User is not found!"));
 
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("photo", InetAddress.getLocalHost().getHostAddress() + ":" + serverPort + "/resources/avatar/" + userEntity.getPath_avatar());
-        jsonObject.put("username", userEntity.getUsername());
-        jsonObject.put("name", userEntity.getName());
-
-        jsonObject.put("show_email", userEntity.isShow_email());
-        jsonObject.put("email_contact", userEntity.getContact_email() == null ? "" : userEntity.getContact_email());
-
-        jsonObject.put("show_phone", userEntity.isShow_phone());
-        jsonObject.put("phone_contact", userEntity.getContact_phone() == null ? "" : userEntity.getContact_phone());
-
-        jsonObject.put("privacy", userEntity.getPrivate_status().toString());
-        jsonObject.put("censored", userEntity.getCensoredMessage().toString());
-
-        JSONObject message = new JSONObject();
-        message.put("request", userEntity.isShow_message_request());
-        message.put("reaction", userEntity.isShow_message_reaction());
-
-        JSONObject notification = new JSONObject();
-        notification.put("action", userEntity.isNotification_action());
-        notification.put("request", userEntity.isNotification_request());
-        notification.put("message", userEntity.isNotification_message());
-        notification.put("email", userEntity.isNotification_email());
-
-        jsonObject.put("notification", notification);
-        jsonObject.put("message", message);
-
-        return new ResponseEntity(jsonObject.toJSONString(), HttpStatus.OK);
+        return new ResponseEntity(userEntity.toString(), HttpStatus.OK);
     }
 
     @PutMapping("/settings")
@@ -145,67 +118,62 @@ public class UserController {
             userEntity.setName(settingsRequest.getName());
         }
 
-        if(settingsRequest.isShow_email() != null && userEntity.isShow_email() != settingsRequest.isShow_email())
-            userEntity.setShow_email(settingsRequest.isShow_email());
-
-        if(settingsRequest.isShow_phone() != null && userEntity.isShow_phone() != settingsRequest.isShow_phone())
-            userEntity.setShow_phone(settingsRequest.isShow_phone());
+        if(settingsRequest.getShowEmail() != null) userEntity.setShowContactEmail(settingsRequest.getShowEmail());
+        if(settingsRequest.getShowEmail() != null) userEntity.setShowContactPhone(settingsRequest.getShowEmail());
 
         if(settingsRequest.getEmail() != null) {
             if (!settingsRequest.getEmail().isEmpty() && !settingsRequest.getEmail().matches("^[\\w-\\+]+(\\.[\\w]+)*@[\\w-]+(\\.[\\w]+)*(\\.[a-z]{2,})$"))
                 return new ResponseEntity("Invalid mailing address format!", HttpStatus.BAD_REQUEST);
 
-            userEntity.setContact_email(settingsRequest.getEmail());
+            userEntity.setContactEmail(settingsRequest.getEmail());
         }
 
         if(settingsRequest.getPhone() != null) {
             if(!settingsRequest.getPhone().isEmpty() && !settingsRequest.getPhone().matches("^\\+[\\(\\-]?(\\d[\\(\\)\\-]?){11}\\d$"))
                 return new ResponseEntity("Invalid phone format!", HttpStatus.BAD_REQUEST);
 
-            userEntity.setContact_phone(settingsRequest.getPhone());
+            userEntity.setContactPhone(settingsRequest.getPhone());
         }
 
-        if(settingsRequest.isNotification_action() != null && userEntity.isNotification_action() != settingsRequest.isNotification_action())
-            userEntity.setNotification_action(settingsRequest.isNotification_action());
+        if(settingsRequest.getNotifyAction() != null)
+            userEntity.setNotifyAction(settingsRequest.getNotifyAction());
 
-        if(settingsRequest.isNotification_request() != null && userEntity.isNotification_request() != settingsRequest.isNotification_request())
-            userEntity.setNotification_request(settingsRequest.isNotification_request());
+        if(settingsRequest.getNotifyRequest() != null)
+            userEntity.setNotifyRequest(settingsRequest.getNotifyRequest());
 
-        if(settingsRequest.isNotification_message() != null && userEntity.isNotification_message() != settingsRequest.isNotification_message())
-            userEntity.setNotification_message(settingsRequest.isNotification_message());
+        if(settingsRequest.getNotifyMessage() != null)
+            userEntity.setNotifyMessage(settingsRequest.getNotifyMessage());
 
-        if(settingsRequest.isNotification_email() != null && userEntity.isNotification_email() != settingsRequest.isNotification_email())
-            userEntity.setNotification_email(settingsRequest.isNotification_email());
+        if(settingsRequest.getNotifyEmail() != null)
+            userEntity.setNotifyEmail(settingsRequest.getNotifyEmail());
 
-        if(settingsRequest.getPrivacy() != null) {
-            if(settingsRequest.getPrivacy().equals("TYPE_PUBLIC"))
-                userEntity.setPrivate_status(TypePrivateEntity.TYPE_PUBLIC);
+        if(settingsRequest.getType() != null) {
+            if(settingsRequest.getType().equals("TYPE_PUBLIC"))
+                userEntity.setType(TypePrivateEntity.TYPE_PUBLIC);
 
-            if(settingsRequest.getPrivacy().equals("TYPE_PRIVATE"))
-                userEntity.setPrivate_status(TypePrivateEntity.TYPE_PRIVATE);
+            if(settingsRequest.getType().equals("TYPE_PRIVATE"))
+                userEntity.setType(TypePrivateEntity.TYPE_PRIVATE);
 
-            if(settingsRequest.getPrivacy().equals("TYPE_CLOSE"))
-                userEntity.setPrivate_status(TypePrivateEntity.TYPE_CLOSE);
+            if(settingsRequest.getType().equals("TYPE_CLOSE"))
+                userEntity.setType(TypePrivateEntity.TYPE_CLOSE);
         }
 
-        if(settingsRequest.getCensored() != null) {
-            if(settingsRequest.getCensored().equals("NO_GET_MESSAGE"))
-                userEntity.setCensoredMessage(CensoredMessageEntity.NO_GET_MESSAGE);
+        if(settingsRequest.getMessage() != null) {
+            if(settingsRequest.getMessage().equals("NO_GET_MESSAGE"))
+                userEntity.setMessage(CensoredMessageEntity.NO_GET_MESSAGE);
 
-            if(settingsRequest.getCensored().equals("CENSORED_MESSAGE"))
-                userEntity.setCensoredMessage(CensoredMessageEntity.CENSORED_MESSAGE);
+            if(settingsRequest.getMessage().equals("CENSORED_MESSAGE"))
+                userEntity.setMessage(CensoredMessageEntity.CENSORED_MESSAGE);
 
-            if(settingsRequest.getCensored().equals("NO_CENSORED"))
-                userEntity.setCensoredMessage(CensoredMessageEntity.NO_CENSORED);
+            if(settingsRequest.getMessage().equals("NO_CENSORED"))
+                userEntity.setMessage(CensoredMessageEntity.NO_CENSORED);
         }
 
-        logger.info(settingsRequest.isShowMessageRequest() + " " + settingsRequest.isShowMessageReaction());
+        if(settingsRequest.getShowMessageRequest() != null)
+            userEntity.setShowMessageRequest(settingsRequest.getShowMessageRequest());
 
-        if(settingsRequest.isShowMessageRequest() != null && userEntity.isShow_message_request() != settingsRequest.isShowMessageRequest())
-            userEntity.setShow_message_request(settingsRequest.isShowMessageRequest());
-
-        if(settingsRequest.isShowMessageReaction() != null && userEntity.isShow_message_reaction() != settingsRequest.isShowMessageReaction())
-            userEntity.setShow_message_reaction(settingsRequest.isShowMessageReaction());
+        if(settingsRequest.getShowMessageReaction() != null)
+            userEntity.setShowMessageReaction(settingsRequest.getShowMessageReaction());
 
         userRepository.save(userEntity);
         return new ResponseEntity("User settings updated!", HttpStatus.OK);
@@ -240,7 +208,7 @@ public class UserController {
         stream.write(bytes);
         stream.close();
 
-        userEntity.setPath_avatar(fileName);
+        userEntity.setFileNameAvatar(fileName);
 
         FileEntity fileEntity = new FileEntity(fileName, userEntity.getId(), new Date(), TypeFile.FILE_AVATAR);
 
@@ -257,13 +225,13 @@ public class UserController {
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(
                 () -> new UsernameNotFoundException("User is not found!"));
 
-        if(!passwordEncoder.matches(changePasswordRequest.getOld_password(), userEntity.getPassword()))
+        if(!passwordEncoder.matches(changePasswordRequest.getPasswordOld(), userEntity.getPassword()))
             return new ResponseEntity("The current password is incorrect!", HttpStatus.BAD_REQUEST);
 
-        if(!changePasswordRequest.getNew_password().matches("(?=^.{6,}$)((?=.*\\d)|(?=.*\\W+))(?![.\\n])(?=.*[A-Z])(?=.*[a-z]).*$"))
+        if(!changePasswordRequest.getPasswordNew().matches("(?=^.{6,}$)((?=.*\\d)|(?=.*\\W+))(?![.\\n])(?=.*[A-Z])(?=.*[a-z]).*$"))
             return new ResponseEntity("Wrong password format!", HttpStatus.BAD_REQUEST);
 
-        userEntity.setPassword(passwordEncoder.encode(changePasswordRequest.getNew_password()));
+        userEntity.setPassword(passwordEncoder.encode(changePasswordRequest.getPasswordNew()));
         userRepository.save(userEntity);
         return new ResponseEntity("Password changed!", HttpStatus.OK);
     }
@@ -281,7 +249,7 @@ public class UserController {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("name", users.get(i).getName());
             jsonObject.put("username", users.get(i).getUsername());
-            jsonObject.put("avatar", InetAddress.getLocalHost().getHostAddress() + ":" + serverPort + "/resources/avatar/" + users.get(i).getPath_avatar());
+            jsonObject.put("avatar", InetAddress.getLocalHost().getHostAddress() + ":" + serverPort + "/resources/avatar/" + users.get(i).getFileNameAvatar());
             jsonArray.add(jsonObject);
         }
 

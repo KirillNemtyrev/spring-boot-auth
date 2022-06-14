@@ -1,8 +1,10 @@
 package com.community.server.payload;
 
+import lombok.Getter;
 import org.springframework.lang.Nullable;
 import javax.validation.constraints.*;
 
+@Getter
 public class SettingsRequest {
 
     @Size(max = 40)
@@ -11,95 +13,32 @@ public class SettingsRequest {
     @Size(max = 40)
     private String username;
 
-    @Nullable
-    private Boolean show_email;
-
-    @Nullable
-    private Boolean show_phone;
-
-    @Nullable
-    private Boolean show_message_request;
-
-    @Nullable
-    private Boolean show_message_reaction;
-
     @Size(max = 40)
     private String email;
 
     @Size(max = 11)
     private String phone;
 
-    @Nullable
-    private Boolean notification_action;
-
-    @Nullable
-    private Boolean notification_request;
-
-    @Nullable
-    private Boolean notification_message;
-
-    @Nullable
-    private Boolean notification_email;
+    @Size(max = 20)
+    private String type;
 
     @Size(max = 20)
-    private String privacy;
+    private String message;
 
-    @Size(max = 20)
-    private String censored;
+    private Boolean showEmail;
 
-    public String getPhone() {
-        return phone;
-    }
+    private Boolean showPhone;
 
-    public String getEmail() {
-        return email;
-    }
+    private Boolean showMessageRequest;
 
-    public Boolean isShow_phone() {
-        return show_phone;
-    }
+    private Boolean showMessageReaction;
 
-    public Boolean isShow_email() {
-        return show_email;
-    }
+    private Boolean notifyAction;
 
-    public String getUsername() {
-        return username;
-    }
+    private Boolean notifyRequest;
 
-    public String getName() {
-        return name;
-    }
+    private Boolean notifyMessage;
 
-    public Boolean isNotification_action() {
-        return notification_action;
-    }
+    private Boolean notifyEmail;
 
-    public Boolean isNotification_request() {
-        return notification_request;
-    }
-
-    public Boolean isNotification_message() {
-        return notification_message;
-    }
-
-    public Boolean isNotification_email() {
-        return notification_email;
-    }
-
-    public String getPrivacy() {
-        return privacy;
-    }
-
-    public String getCensored() {
-        return censored;
-    }
-
-    public Boolean isShowMessageRequest() {
-        return show_message_request;
-    }
-
-    public Boolean isShowMessageReaction() {
-        return show_message_reaction;
-    }
 }

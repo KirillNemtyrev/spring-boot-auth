@@ -88,21 +88,6 @@ public class AuthController {
                 .orElseThrow(() -> new AppException("User Role not set."));
 
         user.setRoles(Collections.singleton(userRole));
-        user.setResetcode("null");
-        user.setCreate_time(new Date());
-        user.setPrivate_status(TypePrivateEntity.TYPE_PUBLIC);
-        user.setCensoredMessage(CensoredMessageEntity.NO_GET_MESSAGE);
-        user.setPath_avatar("no_avatar.jpg");
-
-        user.setShow_email(false);
-        user.setShow_phone(false);
-
-        user.setNotification_action(true);
-        user.setNotification_message(true);
-        user.setNotification_request(true);
-        user.setNotification_email(true);
-        user.setShow_message_request(true);
-        user.setShow_message_reaction(true);
 
         userRepository.save(user);
         return new ResponseEntity("User registered successfully", HttpStatus.OK);
@@ -127,7 +112,7 @@ public class AuthController {
                 () -> new UsernameNotFoundException("User with given email address not found!"));
 
 
-        user.setResetcode(new Random().ints(48, 122)
+        user.setRecoveryCode(new Random().ints(48, 122)
                 .filter(i -> (i < 57 || i > 65) && (i < 90 || i > 97))
                 .mapToObj(i -> (char) i)
                 .limit(6)
@@ -136,10 +121,10 @@ public class AuthController {
 
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + resetExpirationInMs);
-        user.setReset_time(expiryDate);
+        user.setRecoveryDate(expiryDate);
 
         try {
-            mailService.sendEmail(recoveryRequest.getEmail(), "Восстановление учётной записи", "Ваш код - " + user.getResetcode());
+            mailService.sendEmail(recoveryRequest.getEmail(), "Восстановление учётной записи", "Ваш код - " + user.getRecoveryCode());
         } catch (MessagingException e) {
             return new ResponseEntity("Unable to send message", HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -153,15 +138,19 @@ public class AuthController {
         UserEntity user = userRepository.findByEmail(recoveryRequest.getEmail()).orElseThrow(
                 () -> new UsernameNotFoundException("User with given email address not found!"));
 
-        if(user.getResetcode().equals("null") || !user.getResetcode().equalsIgnoreCase(recoveryRequest.getCode())) {
+        if(user.getRecoveryCode() == null || !user.getRecoveryCode().equalsIgnoreCase(recoveryRequest.getCode()))
             return new ResponseEntity("Invalid code entered!", HttpStatus.BAD_REQUEST);
-        }
 
-        if(!recoveryRequest.getNew_password().matches("(?=^.{6,}$)((?=.*\\d)|(?=.*\\W+))(?![.\\n])(?=.*[A-Z])(?=.*[a-z]).*$"))
+        if(user.getRecoveryDate() == null || new Date().before(user.getRecoveryDate()))
+            return new ResponseEntity("Code time is up!", HttpStatus.BAD_REQUEST);
+
+        if(!recoveryRequest.getPassword().matches("(?=^.{6,}$)((?=.*\\d)|(?=.*\\W+))(?![.\\n])(?=.*[A-Z])(?=.*[a-z]).*$"))
             return new ResponseEntity("Wrong password format!", HttpStatus.BAD_REQUEST);
 
-        user.setPassword(passwordEncoder.encode(recoveryRequest.getNew_password()));
-        user.setResetcode("null");
+        user.setRecoveryCode(null);
+        user.setRecoveryDate(null);
+
+        user.setPassword(passwordEncoder.encode(recoveryRequest.getPassword()));
 
         userRepository.save(user);
         return new ResponseEntity("A message with a recovery code has been sent!", HttpStatus.OK);

@@ -1,7 +1,10 @@
 package com.community.server.payload;
 
+import lombok.Getter;
+
 import javax.validation.constraints.NotBlank;
 
+@Getter
 public class RecoveryChangeRequest {
 
     @NotBlank
@@ -11,17 +14,5 @@ public class RecoveryChangeRequest {
     private String code;
 
     @NotBlank
-    private String new_password;
-
-    public String getNew_password() {
-        return new_password;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public String getEmail() {
-        return email;
-    }
+    private String password;
 }

@@ -1,23 +1,18 @@
 package com.community.server.payload;
 
+import lombok.Getter;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
+@Getter
 public class ChangePasswordRequest {
 
     @NotBlank
     @Size(max = 100)
-    private String old_password;
+    private String passwordOld;
 
     @NotBlank
     @Size(max = 100)
-    private String new_password;
-
-    public String getOld_password() {
-        return old_password;
-    }
-
-    public String getNew_password() {
-        return new_password;
-    }
+    private String passwordNew;
 }
