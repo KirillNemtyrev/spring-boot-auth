@@ -2,6 +2,7 @@ package com.community.server.entity;
 
 import com.community.server.enums.CensoredMessageEntity;
 import com.community.server.enums.TypePrivateEntity;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.NaturalId;
@@ -17,6 +18,7 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
+@Data
 @Table(name = "users")
 public class UserEntity {
 
@@ -42,7 +44,7 @@ public class UserEntity {
     @Size(max = 100)
     private String password;
 
-    @NotBlank
+    @Nullable
     @Size(max = 6)
     private String recoveryCode;
 

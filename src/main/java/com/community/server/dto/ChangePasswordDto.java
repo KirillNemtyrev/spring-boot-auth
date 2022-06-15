@@ -1,4 +1,4 @@
-package com.community.server.payload;
+package com.community.server.dto;
 
 import lombok.Getter;
 
@@ -6,7 +6,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
 @Getter
-public class ChangePasswordRequest {
+public class ChangePasswordDto {
 
     @NotBlank
     @Size(max = 100)

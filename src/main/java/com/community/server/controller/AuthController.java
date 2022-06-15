@@ -1,11 +1,9 @@
 package com.community.server.controller;
 
+import com.community.server.dto.*;
 import com.community.server.entity.*;
-import com.community.server.enums.CensoredMessageEntity;
 import com.community.server.enums.RoleNameEntity;
-import com.community.server.enums.TypePrivateEntity;
 import com.community.server.exception.AppException;
-import com.community.server.payload.*;
 import com.community.server.repository.RoleRepository;
 import com.community.server.repository.SupportRepository;
 import com.community.server.repository.UserRepository;
@@ -26,7 +24,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import javax.mail.MessagingException;
 import javax.validation.Valid;
 import java.util.Collections;
@@ -65,28 +62,25 @@ public class AuthController {
     private int resetExpirationInMs;
 
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody SignUpRequest signUpRequest) {
-        if(!signUpRequest.getUsername().matches("^[a-zA-Z0-9]+$"))
+    public ResponseEntity<?> registerUser(@Valid @RequestBody SignUpDto signUpDto) {
+        if(!signUpDto.getUsername().matches("^[a-zA-Z0-9]+$"))
             return new ResponseEntity("Invalid username!", HttpStatus.BAD_REQUEST);
 
-        if (userRepository.existsByUsername(signUpRequest.getUsername())) {
+        if (userRepository.existsByUsername(signUpDto.getUsername())) {
             return new ResponseEntity("Username is already taken!", HttpStatus.BAD_REQUEST);
         }
 
-        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+        if (userRepository.existsByEmail(signUpDto.getEmail())) {
             return new ResponseEntity("Email Address already in use!", HttpStatus.BAD_REQUEST);
         }
 
-        if(!signUpRequest.getPassword().matches("(?=^.{6,}$)((?=.*\\d)|(?=.*\\W+))(?![.\\n])(?=.*[A-Z])(?=.*[a-z]).*$"))
+        if(!signUpDto.getPassword().matches("(?=^.{6,}$)((?=.*\\d)|(?=.*\\W+))(?![.\\n])(?=.*[A-Z])(?=.*[a-z]).*$"))
             return new ResponseEntity("Wrong password format!", HttpStatus.BAD_REQUEST);
 
-        UserEntity user = new UserEntity(signUpRequest.getUsername(), signUpRequest.getUsername(), signUpRequest.getEmail(),
-                signUpRequest.getPassword());
+        UserEntity user = new UserEntity(signUpDto.getUsername(), signUpDto.getUsername(), signUpDto.getEmail(), signUpDto.getPassword());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        RoleEntity userRole = roleRepository.findByName(RoleNameEntity.ROLE_USER)
-                .orElseThrow(() -> new AppException("User Role not set."));
-
+        RoleEntity userRole = roleRepository.findByName(RoleNameEntity.ROLE_USER).orElseThrow(() -> new AppException("User Role not set."));
         user.setRoles(Collections.singleton(userRole));
 
         userRepository.save(user);
@@ -94,10 +88,10 @@ public class AuthController {
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginDto loginDto) {
 
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsernameOrEmail(), loginRequest.getPassword()));
+                new UsernamePasswordAuthenticationToken(loginDto.getUsernameOrEmail(), loginDto.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -106,7 +100,7 @@ public class AuthController {
     }
 
     @PostMapping("/reset/send")
-    public ResponseEntity<?> recoverycodeUser(@Valid @RequestBody RecoverySendRequest recoveryRequest) {
+    public ResponseEntity<?> recoverycodeUser(@Valid @RequestBody RecoveryDto recoveryRequest) {
 
         UserEntity user = userRepository.findByEmail(recoveryRequest.getEmail()).orElseThrow(
                 () -> new UsernameNotFoundException("User with given email address not found!"));
@@ -133,7 +127,7 @@ public class AuthController {
     }
 
     @PostMapping("/reset/change")
-    public ResponseEntity<?> recoverypasswordUser(@Valid @RequestBody RecoveryChangeRequest recoveryRequest) {
+    public ResponseEntity<?> recoverypasswordUser(@Valid @RequestBody RecoveryChangeDto recoveryRequest) {
 
         UserEntity user = userRepository.findByEmail(recoveryRequest.getEmail()).orElseThrow(
                 () -> new UsernameNotFoundException("User with given email address not found!"));
@@ -157,10 +151,10 @@ public class AuthController {
     }
 
     @PostMapping("/support")
-    public ResponseEntity<?> support(@Valid @RequestBody SupportRequest supportRequest) {
+    public ResponseEntity<?> support(@Valid @RequestBody SupportDto supportDto) {
 
         SupportEntity supportEntity = new SupportEntity(
-                supportRequest.getEmail(), supportRequest.getTitle(), supportRequest.getMessage());
+                supportDto.getEmail(), supportDto.getTitle(), supportDto.getMessage());
 
         supportRepository.save(supportEntity);
         return new ResponseEntity("Support email sent!", HttpStatus.OK);

@@ -1,4 +1,4 @@
-package com.community.server.payload;
+package com.community.server.dto;
 
 import lombok.Getter;
 import lombok.Setter;

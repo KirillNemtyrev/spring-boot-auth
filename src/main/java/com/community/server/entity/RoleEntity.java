@@ -1,10 +1,12 @@
 package com.community.server.entity;
 
 import com.community.server.enums.RoleNameEntity;
+import lombok.Data;
 import org.hibernate.annotations.NaturalId;
 import javax.persistence.*;
 
 @Entity
+@Data
 @Table(name = "roles")
 public class RoleEntity {
 

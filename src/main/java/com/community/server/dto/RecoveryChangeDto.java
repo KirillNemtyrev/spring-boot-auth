@@ -1,17 +1,18 @@
-package com.community.server.payload;
+package com.community.server.dto;
 
 import lombok.Getter;
 
 import javax.validation.constraints.NotBlank;
 
 @Getter
-public class SupportRequest {
+public class RecoveryChangeDto {
+
     @NotBlank
     private String email;
 
     @NotBlank
-    private String title;
+    private String code;
 
     @NotBlank
-    private String message;
+    private String password;
 }

@@ -1,4 +1,4 @@
-package com.community.server.payload;
+package com.community.server.dto;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -7,7 +7,7 @@ import javax.validation.constraints.NotBlank;
 
 @Getter
 @Setter
-public class LoginRequest {
+public class LoginDto {
 
     @NotBlank
     private String usernameOrEmail;

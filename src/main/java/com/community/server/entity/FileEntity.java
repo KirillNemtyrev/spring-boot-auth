@@ -1,6 +1,7 @@
 package com.community.server.entity;
 
 import com.community.server.enums.TypeFile;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
@@ -11,6 +12,7 @@ import java.io.FileWriter;
 import java.util.Date;
 
 @Entity
+@Data
 @Getter
 @Setter
 @Table(name = "files")
