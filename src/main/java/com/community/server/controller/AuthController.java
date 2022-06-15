@@ -135,7 +135,7 @@ public class AuthController {
         if(user.getRecoveryCode() == null || !user.getRecoveryCode().equalsIgnoreCase(recoveryRequest.getCode()))
             return new ResponseEntity("Invalid code entered!", HttpStatus.BAD_REQUEST);
 
-        if(user.getRecoveryDate() == null || new Date().before(user.getRecoveryDate()))
+        if(user.getRecoveryDate() == null || user.getRecoveryDate().before(new Date()))
             return new ResponseEntity("Code time is up!", HttpStatus.BAD_REQUEST);
 
         if(!recoveryRequest.getPassword().matches("(?=^.{6,}$)((?=.*\\d)|(?=.*\\W+))(?![.\\n])(?=.*[A-Z])(?=.*[a-z]).*$"))
@@ -143,7 +143,6 @@ public class AuthController {
 
         user.setRecoveryCode(null);
         user.setRecoveryDate(null);
-
         user.setPassword(passwordEncoder.encode(recoveryRequest.getPassword()));
 
         userRepository.save(user);

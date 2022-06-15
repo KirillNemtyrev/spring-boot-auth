@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.NaturalId;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
@@ -34,7 +35,7 @@ public class UserEntity {
     @Size(max = 40)
     private String username;
 
-    @NaturalId
+    @NaturalId(mutable=true)
     @NotBlank
     @Size(max = 40)
     @Email
@@ -49,10 +50,8 @@ public class UserEntity {
     private String recoveryCode;
 
     @Nullable
-    private Date recoveryDate;
-
-    @CreatedDate
-    private Date createDate = new Date();
+    @Size(max = 6)
+    private String emailCode;
 
     @Size(max = 40)
     private String contactEmail;
@@ -62,6 +61,18 @@ public class UserEntity {
 
     @NotBlank
     private String fileNameAvatar = "no_avatar.jpg";
+
+    @Nullable
+    private Date recoveryDate;
+
+    @Nullable
+    private Date emailDate;
+
+    @CreatedDate
+    private Date createDate = new Date();
+
+    @LastModifiedDate
+    private Date lastModifyDate;
 
     private Boolean showContactEmail = Boolean.FALSE;
     private Boolean showContactPhone = Boolean.FALSE;

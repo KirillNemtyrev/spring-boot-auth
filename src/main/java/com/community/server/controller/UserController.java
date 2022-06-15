@@ -1,15 +1,21 @@
 package com.community.server.controller;
 
+import com.community.server.dto.ChangeEmailDto;
+import com.community.server.entity.BlackListEntity;
 import com.community.server.entity.FileEntity;
 import com.community.server.entity.UserEntity;
 import com.community.server.enums.TypeFile;
 import com.community.server.dto.ChangePasswordDto;
 import com.community.server.dto.SettingsDto;
 import com.community.server.mapper.UserMapper;
+import com.community.server.repository.BlackListRepository;
 import com.community.server.repository.FileRepository;
 import com.community.server.repository.UserRepository;
 import com.community.server.security.JwtAuthenticationFilter;
 import com.community.server.security.JwtTokenProvider;
+import com.community.server.service.MailService;
+import com.community.server.service.UserService;
+import com.community.server.view.BlackListView;
 import com.community.server.view.UserView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,13 +27,14 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
 
@@ -44,6 +51,9 @@ public class UserController {
     private FileRepository fileRepository;
 
     @Autowired
+    private BlackListRepository blackListRepository;
+
+    @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Autowired
@@ -55,8 +65,14 @@ public class UserController {
     @Autowired
     private UserMapper userMapper;
 
-    @Value("${server.port}")
-    private String serverPort;
+    @Autowired
+    public UserService userService;
+
+    @Autowired
+    public MailService mailService;
+
+    @Value("${app.resetExpirationInMs}")
+    private int resetExpirationInMs;
 
     @GetMapping("/settings")
     public UserView getSettings(HttpServletRequest request) throws UnknownHostException {
@@ -207,6 +223,83 @@ public class UserController {
         userEntity.setPassword(passwordEncoder.encode(changePasswordDto.getPasswordNew()));
         userRepository.save(userEntity);
         return new ResponseEntity("Password changed!", HttpStatus.OK);
+    }
+
+    @GetMapping("/change/email")
+    public ResponseEntity<?> sendCode(HttpServletRequest request) {
+        String jwt = jwtAuthenticationFilter.getJwtFromRequest(request);
+        Long userId = tokenProvider.getUserIdFromJWT(jwt);
+
+        UserEntity userEntity = userRepository.findById(userId).orElseThrow(
+                () -> new UsernameNotFoundException("User is not found!"));
+
+        userEntity.setEmailCode(new Random().ints(48, 122)
+                .filter(i -> (i < 57 || i > 65) && (i < 90 || i > 97))
+                .mapToObj(i -> (char) i)
+                .limit(6)
+                .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
+                .toString().toUpperCase());
+
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + resetExpirationInMs);
+        userEntity.setEmailDate(expiryDate);
+
+        try {
+            mailService.sendEmail(userEntity.getEmail(), "Смена почты", "Ваш код - " + userEntity.getEmailCode());
+        } catch (MessagingException e) {
+            return new ResponseEntity("Unable to send message", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        userRepository.save(userEntity);
+        return new ResponseEntity("A message with a change email code has been sent!", HttpStatus.OK);
+    }
+
+    @PutMapping("/change/email")
+    public ResponseEntity<?> changeEmail(HttpServletRequest request, @Valid @RequestBody ChangeEmailDto changeEmailDto) {
+
+        String jwt = jwtAuthenticationFilter.getJwtFromRequest(request);
+        Long userId = tokenProvider.getUserIdFromJWT(jwt);
+
+        UserEntity userEntity = userRepository.findById(userId).orElseThrow(
+                () -> new UsernameNotFoundException("User is not found!"));
+
+        if(userEntity.getEmailCode() == null || !userEntity.getEmailCode().equalsIgnoreCase(changeEmailDto.getCode()))
+            return new ResponseEntity("Invalid code entered!", HttpStatus.BAD_REQUEST);
+
+        if(userEntity.getEmailDate() == null || userEntity.getEmailDate().before(new Date()))
+            return new ResponseEntity("Code time is up!", HttpStatus.BAD_REQUEST);
+
+        if (userRepository.existsByEmail(changeEmailDto.getEmail()))
+            return new ResponseEntity("Email Address already in use!", HttpStatus.BAD_REQUEST);
+
+        userEntity.setEmailCode(null);
+        userEntity.setEmailDate(null);
+        userEntity.setEmail(changeEmailDto.getEmail());
+
+        userRepository.save(userEntity);
+        return new ResponseEntity("Email address has been changed", HttpStatus.OK);
+    }
+
+    @GetMapping("/blacklist")
+    public List<BlackListView> blackList(HttpServletRequest request) {
+
+        String jwt = jwtAuthenticationFilter.getJwtFromRequest(request);
+        Long userId = tokenProvider.getUserIdFromJWT(jwt);
+
+        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("User is not found!"));
+
+        List<BlackListEntity> blackListRepositoryList = blackListRepository.findByUserId(userEntity.getId());
+        List<BlackListView> blackListViews = new ArrayList<>();
+
+        for(int count = 0; count < blackListRepositoryList.size(); count++) {
+            Long userID = blackListRepositoryList.get(count).getUserId();
+            UserEntity user = userRepository.findById(userID).orElseThrow(
+                    () -> new UsernameNotFoundException("User is not found!"));
+
+            BlackListView blackListView = new BlackListView(user.getId(), user.getName(), user.getUsername(), user.getFileNameAvatar());
+            blackListViews.add(blackListView);
+        }
+
+        return blackListViews;
     }
 
     @GetMapping("/find/{name}")

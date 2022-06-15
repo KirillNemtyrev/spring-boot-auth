@@ -8,7 +8,6 @@ import lombok.Getter;
 
 import java.util.Date;
 
-@Getter
 @Data
 @AllArgsConstructor
 public class UserView {
