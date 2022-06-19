@@ -1,7 +1,5 @@
 package com.community.server.entity;
 
-import com.community.server.enums.RoleNameEntity;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.NaturalId;

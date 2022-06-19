@@ -2,7 +2,7 @@ package com.community.server.controller;
 
 import com.community.server.body.*;
 import com.community.server.entity.*;
-import com.community.server.enums.RoleNameEntity;
+import com.community.server.entity.RoleNameEntity;
 import com.community.server.exception.AppException;
 import com.community.server.repository.RoleRepository;
 import com.community.server.repository.SupportRepository;
@@ -21,16 +21,12 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.Collections;
-import java.util.Date;
-import java.util.Random;
 
 @RestController
 @RequestMapping("/api/auth")

@@ -1,7 +1,7 @@
 package com.community.server.repository;
 
 import com.community.server.entity.RoleEntity;
-import com.community.server.enums.RoleNameEntity;
+import com.community.server.entity.RoleNameEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
