@@ -10,7 +10,6 @@ import javax.validation.constraints.NotBlank;
 import java.util.Date;
 
 @Entity
-@Data
 @Getter
 @Setter
 @Table(name = "blacklist")

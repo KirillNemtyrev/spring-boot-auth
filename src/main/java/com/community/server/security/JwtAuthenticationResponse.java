@@ -1,4 +1,4 @@
-package com.community.server.dto;
+package com.community.server.security;
 
 import lombok.Getter;
 import lombok.Setter;

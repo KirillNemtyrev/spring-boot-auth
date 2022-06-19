@@ -1,8 +1,5 @@
 package com.community.server.entity;
 
-import com.community.server.enums.CensoredMessageEntity;
-import com.community.server.enums.TypePrivateEntity;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.NaturalId;
@@ -19,7 +16,6 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
-@Data
 @Table(name = "users")
 public class UserEntity {
 
@@ -28,11 +24,12 @@ public class UserEntity {
     private Long id;
 
     @NotBlank
-    @Size(max = 40)
+    @Size(min=2, max = 40)
     private String name;
 
     @NotBlank
-    @Size(max = 40)
+    @NaturalId(mutable=true)
+    @Size(min=6, max = 40)
     private String username;
 
     @NaturalId(mutable=true)
@@ -53,14 +50,20 @@ public class UserEntity {
     @Size(max = 6)
     private String emailCode;
 
+    @Size(max = 70)
+    private String aboutMe;
+
     @Size(max = 40)
     private String contactEmail;
 
-    @Size(max = 40)
+    @Size(max = 12)
     private String contactPhone;
 
     @NotBlank
     private String fileNameAvatar = "no_avatar.jpg";
+
+    @NotBlank
+    private String registerIP;
 
     @Nullable
     private Date recoveryDate;
@@ -72,25 +75,13 @@ public class UserEntity {
     private Date createDate = new Date();
 
     @LastModifiedDate
-    private Date lastModifyDate;
-
-    private Boolean showContactEmail = Boolean.FALSE;
-    private Boolean showContactPhone = Boolean.FALSE;
-    private Boolean showMessageRequest = Boolean.TRUE;
-    private Boolean showMessageReaction = Boolean.TRUE;
-    private Boolean notifyAction = Boolean.TRUE;
-    private Boolean notifyRequest = Boolean.TRUE;
-    private Boolean notifyMessage = Boolean.TRUE;
-    private Boolean notifyEmail = Boolean.TRUE;
+    private Date lastModifyDate = new Date();
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<RoleEntity> roles = new HashSet<>();
-
-    private TypePrivateEntity type = TypePrivateEntity.TYPE_PUBLIC;
-    private CensoredMessageEntity message = CensoredMessageEntity.CENSORED_MESSAGE;
 
     public UserEntity() {}
 

@@ -2,11 +2,14 @@ package com.community.server.entity;
 
 import com.community.server.enums.RoleNameEntity;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.NaturalId;
 import javax.persistence.*;
 
 @Entity
-@Data
+@Getter
+@Setter
 @Table(name = "roles")
 public class RoleEntity {
 
@@ -22,22 +25,6 @@ public class RoleEntity {
     public RoleEntity() {}
 
     public RoleEntity(RoleNameEntity name) {
-        this.name = name;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public RoleNameEntity getName() {
-        return name;
-    }
-
-    public void setName(RoleNameEntity name) {
         this.name = name;
     }
 }

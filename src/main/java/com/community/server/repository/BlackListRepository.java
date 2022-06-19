@@ -11,6 +11,7 @@ import java.util.Optional;
 public interface BlackListRepository  extends JpaRepository<BlackListEntity, Long> {
 
     Optional<BlackListEntity> findById(Long id);
+    Optional<BlackListEntity> findByUserIdAndBanId(Long userId, Long banId);
 
     List<BlackListEntity> findByUserId(Long userId);
     List<BlackListEntity> findByBanId(Long banId);

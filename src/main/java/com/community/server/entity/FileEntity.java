@@ -12,7 +12,6 @@ import java.io.FileWriter;
 import java.util.Date;
 
 @Entity
-@Data
 @Getter
 @Setter
 @Table(name = "files")
