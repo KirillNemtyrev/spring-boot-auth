@@ -42,24 +42,10 @@ public class AuthController {
     public RoleRepository roleRepository;
 
     @Autowired
-    public SupportRepository supportRepository;
-
-    @Autowired
     public PasswordEncoder passwordEncoder;
 
     @Autowired
     public JwtTokenProvider tokenProvider;
-
-    @Autowired
-    public UserService userService;
-
-    @Autowired
-    public MailService mailService;
-
-    @Value("${app.resetExpirationInMs}")
-    private int resetExpirationInMs;
-
-    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(HttpServletRequest request, @Valid @RequestBody SignUP signUP) {
@@ -100,14 +86,4 @@ public class AuthController {
         String jwt = tokenProvider.generateToken(authentication);
         return ResponseEntity.ok(new JwtAuthenticationResponse(jwt));
     }
-
-    /*@PostMapping("/support")
-    public ResponseEntity<?> support(@Valid @RequestBody SupportDto supportDto) {
-
-        SupportEntity supportEntity = new SupportEntity(
-                supportDto.getEmail(), supportDto.getTitle(), supportDto.getMessage());
-
-        supportRepository.save(supportEntity);
-        return new ResponseEntity("Support email sent!", HttpStatus.OK);
-    }*/
 }

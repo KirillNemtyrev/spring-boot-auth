@@ -33,7 +33,7 @@ public class SettingsController {
     @Autowired
     private SettingsUserMapper settingsUserMapper;
 
-    @GetMapping("/")
+    @GetMapping()
     public UserSettings getSettings(HttpServletRequest request) {
         String jwt = jwtAuthenticationFilter.getJwtFromRequest(request);
         Long userId = tokenProvider.getUserIdFromJWT(jwt);

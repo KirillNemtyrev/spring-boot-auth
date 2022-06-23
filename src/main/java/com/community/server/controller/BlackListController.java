@@ -44,7 +44,7 @@ public class BlackListController {
     private BlackListMapper blackListMapper;
 
 
-    @GetMapping("/")
+    @GetMapping()
     public List<BlackList> blackList(HttpServletRequest request) {
 
         String jwt = jwtAuthenticationFilter.getJwtFromRequest(request);
@@ -65,7 +65,7 @@ public class BlackListController {
         return blackList;
     }
 
-    @PostMapping("/")
+    @PostMapping()
     public ResponseEntity<?> addBlackList(HttpServletRequest request, @PathVariable String username) {
 
         String jwt = jwtAuthenticationFilter.getJwtFromRequest(request);
@@ -86,7 +86,7 @@ public class BlackListController {
         return new ResponseEntity("The user has been blacklisted!", HttpStatus.OK);
     }
 
-    @DeleteMapping("/")
+    @DeleteMapping()
     public ResponseEntity<?> deleteBlackList(HttpServletRequest request, @PathVariable Long id) {
 
         String jwt = jwtAuthenticationFilter.getJwtFromRequest(request);

@@ -1,5 +1,7 @@
 package com.community.server.entity;
 
+import com.community.server.enums.CommentVisible;
+import com.community.server.enums.ProfileStatisticVisible;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.NaturalId;
@@ -12,6 +14,7 @@ import javax.validation.constraints.*;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -22,6 +25,10 @@ public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @NotBlank
+    @NaturalId(mutable=true)
+    private String uuid = UUID.randomUUID().toString();
 
     @NotBlank
     @Size(min=2, max = 40)
@@ -65,6 +72,8 @@ public class UserEntity {
     @NotBlank
     private String registerIP;
 
+    private CommentVisible commentVisible = CommentVisible.ALL_VISION;
+
     @Nullable
     private Date recoveryDate;
 
@@ -82,6 +91,10 @@ public class UserEntity {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<RoleEntity> roles = new HashSet<>();
+
+    private ProfileStatisticVisible visibleMyChats = ProfileStatisticVisible.ALL_VISION;
+    private ProfileStatisticVisible visibleMyInvite = ProfileStatisticVisible.ALL_VISION;
+    private ProfileStatisticVisible visibleMyLike = ProfileStatisticVisible.ALL_VISION;
 
     public UserEntity() {}
 

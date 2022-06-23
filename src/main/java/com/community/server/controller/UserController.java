@@ -1,6 +1,7 @@
 package com.community.server.controller;
 
 import com.community.server.entity.UserEntity;
+import com.community.server.mapper.SearchUserMapper;
 import com.community.server.mapper.SettingsUserMapper;
 import com.community.server.repository.BlackListRepository;
 import com.community.server.repository.FileRepository;
@@ -14,6 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -31,10 +34,10 @@ public class UserController {
     private UserRepository userRepository;
 
     @Autowired
-    private FileRepository fileRepository;
+    private BlackListRepository blackListRepository;
 
     @Autowired
-    private BlackListRepository blackListRepository;
+    private SearchUserMapper searchUserMapper;
 
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -42,62 +45,8 @@ public class UserController {
     @Autowired
     private JwtTokenProvider tokenProvider;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private SettingsUserMapper settingsUserMapper;
-
-    @Autowired
-    public UserService userService;
-
-    @Autowired
-    public MailService mailService;
-
-    @Value("${app.resetExpirationInMs}")
-    private int resetExpirationInMs;
-
-
-    /*@PostMapping("/change/avatar")
-    public ResponseEntity<?> changeAvatar(HttpServletRequest request, @RequestParam MultipartFile file) throws IOException {
-        if(file.isEmpty())
-            return new ResponseEntity("File is empty!", HttpStatus.BAD_REQUEST);
-
-        String suffix = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".") + 1);
-        if(!suffix.equalsIgnoreCase("jpg") && !suffix.equalsIgnoreCase("jpeg") && !suffix.equalsIgnoreCase("png"))
-            return new ResponseEntity("The file is not a photo! Need png, jpeg, jpg format!", HttpStatus.BAD_REQUEST);
-
-        String jwt = jwtAuthenticationFilter.getJwtFromRequest(request);
-        Long userId = tokenProvider.getUserIdFromJWT(jwt);
-
-        UserEntity userEntity = userRepository.findById(userId).orElseThrow(
-                () -> new UsernameNotFoundException("User is not found!"));
-
-        File directory = new File("resources");
-        if(directory.mkdir()) logger.info("The avatar directory has been created!");
-
-        String fileName = UUID.randomUUID().toString() + "." + suffix;
-        String pathTofile = "resources/"+ fileName;
-        File photo = new File(pathTofile);
-
-        if(photo.createNewFile()) logger.info("The avatar file has been created!");
-
-        byte[] bytes = file.getBytes();
-        BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(pathTofile));
-        stream.write(bytes);
-        stream.close();
-
-        userEntity.setFileNameAvatar(fileName);
-
-        FileEntity fileEntity = new FileEntity(fileName, userEntity.getId(), new Date(), TypeFile.FILE_AVATAR);
-
-        fileRepository.save(fileEntity);
-        userRepository.save(userEntity);
-        return new ResponseEntity("User photo changed!", HttpStatus.OK);
-    }
-
     @GetMapping("/id{id}")
-    public UserFindView findUserById(HttpServletRequest request, @PathVariable Long id) {
+    public Object findUserById(HttpServletRequest request, @PathVariable Long id) {
 
         String jwt = jwtAuthenticationFilter.getJwtFromRequest(request);
         Long userId = tokenProvider.getUserIdFromJWT(jwt);
@@ -108,32 +57,11 @@ public class UserController {
         UserEntity findUserEntity = userRepository.findById(id).orElseThrow(
                 () -> new UsernameNotFoundException("Find user is not found!"));
 
-        SimpleDateFormat simpleDateFormat =
-                new SimpleDateFormat("dd MMMM yyyy", new Locale("ru", "RU"));
+        if(blackListRepository.existsByUserIdAndBanId(id, userId))
+            return new ResponseEntity("You are blacklisted!", HttpStatus.BAD_REQUEST);
 
-        UserFindView userFindView = new UserFindView(
-                findUserEntity.getId(),
-                findUserEntity.getName(),
-                findUserEntity.getUsername(),
-                findUserEntity.getFileNameAvatar(),
-                (findUserEntity.getShowContactEmail() ? findUserEntity.getContactEmail() : "Email hidden"),
-                (findUserEntity.getShowContactPhone() ? findUserEntity.getContactPhone() : "Phone hidden"),
-                simpleDateFormat.format(findUserEntity.getCreateDate()),
-                findUserEntity.getType());
-
-        if(blackListRepository.existsByUserIdAndBanId(findUserEntity.getId(), userEntity.getId())) {
-            userFindView.setContactEmail("Can not see");
-            userFindView.setContactPhone("Can not see");
-
-            userFindView.setLimitedToHisPage(Boolean.TRUE);
-            userFindView.setCreatedDate(null);
-        }
-
-        if(blackListRepository.existsByUserIdAndBanId(userEntity.getId(), findUserEntity.getId()))
-            userFindView.setLimitedOnMyPage(Boolean.TRUE);
-
-        return userFindView;
-    }
+        return searchUserMapper.toModel(findUserEntity);
+    }/*
 
     @GetMapping("/{username}")
     public UserFindView findUserById(HttpServletRequest request, @PathVariable String username) {

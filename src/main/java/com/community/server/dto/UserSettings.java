@@ -13,11 +13,12 @@ public class UserSettings {
 
     private String name;
     private String username;
+    private String uuid;
     private String email;
     private String aboutMe;
     private String contactEmail;
     private String contactPhone;
     private String fileNameAvatar;
-
+    //private Boolean closeComment;
     private Date createDate;
 }
