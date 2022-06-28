@@ -5,23 +5,18 @@ import com.community.server.entity.ChatRoomEntity;
 import com.community.server.entity.UserEntity;
 import com.community.server.enums.ChatRoomVisible;
 import com.community.server.events.DeleteChatRoom;
-import com.community.server.events.NewAvatar;
 import com.community.server.exception.AppException;
 import com.community.server.repository.BlackListRepository;
 import com.community.server.repository.ChatRoomRepository;
 import com.community.server.repository.UserRepository;
 import com.community.server.security.JwtAuthenticationFilter;
 import com.community.server.security.JwtTokenProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
-
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +31,9 @@ public class ChatRoomController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private BlackListRepository blackListRepository;
 
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -81,7 +79,7 @@ public class ChatRoomController {
         return chatRoomList;
     }
 
-    @DeleteMapping("/{id}/{everyone}")
+    @DeleteMapping("/id{id}/{everyone}")
     public Object deleteRoom(HttpServletRequest request, @PathVariable Long id, @PathVariable Boolean everyone) {
 
         String jwt = jwtAuthenticationFilter.getJwtFromRequest(request);

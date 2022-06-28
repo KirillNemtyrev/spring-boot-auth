@@ -1,13 +1,11 @@
 package com.community.server.controller;
 
+import com.community.server.body.CommentBody;
 import com.community.server.dto.Comment;
 import com.community.server.entity.CommentsEntity;
 import com.community.server.entity.UserEntity;
 import com.community.server.enums.CommentVisible;
-import com.community.server.repository.ChatRoomRepository;
-import com.community.server.repository.CommentsRepository;
-import com.community.server.repository.ExclusionCommentRepository;
-import com.community.server.repository.UserRepository;
+import com.community.server.repository.*;
 import com.community.server.security.JwtAuthenticationFilter;
 import com.community.server.security.JwtTokenProvider;
 import org.slf4j.Logger;
@@ -16,12 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,10 +43,13 @@ public class CommentsController {
     @Autowired
     private JwtTokenProvider tokenProvider;
 
+    @Autowired
+    private BlackListRepository blackListRepository;
+
     private static final Logger logger = LoggerFactory.getLogger(CommentsController.class);
 
     @GetMapping("/id{id}")
-    public Object getMyComments(HttpServletRequest request, @PathVariable Long id) {
+    public Object getComments(HttpServletRequest request, @PathVariable Long id) {
 
         String jwt = jwtAuthenticationFilter.getJwtFromRequest(request);
         Long userId = tokenProvider.getUserIdFromJWT(jwt);
@@ -60,6 +59,9 @@ public class CommentsController {
 
         UserEntity userEntity = userRepository.findById(id).orElseThrow(
                 () -> new UsernameNotFoundException("Specified user is not found!"));
+
+        if(blackListRepository.existsByUserIdAndBanId(id, userId))
+            return new ResponseEntity("You are blacklisted!", HttpStatus.BAD_REQUEST);
 
         if(((userEntity.getCommentVisible() == CommentVisible.FRIEND_VISION && !chatRoomRepository.existsBySenderIdOrRecipientId(userId, id)) ||
                 (userEntity.getCommentVisible() == CommentVisible.EXCLUSION_VISION && !exclusionCommentRepository.existsByUserIdAndExclusionId(id, userId)) ||
@@ -84,4 +86,32 @@ public class CommentsController {
         return commentList;
     }
 
+    @PostMapping("/id{id}")
+    public Object sendComment(HttpServletRequest request, @PathVariable Long id, @Valid @RequestBody CommentBody commentBody){
+
+        if(commentBody.getComment().isEmpty())
+            return new ResponseEntity("Your comment is empty", HttpStatus.BAD_REQUEST);
+
+        String jwt = jwtAuthenticationFilter.getJwtFromRequest(request);
+        Long userId = tokenProvider.getUserIdFromJWT(jwt);
+
+        if(!userRepository.existsById(userId))
+            return new UsernameNotFoundException("User is not found!");
+
+        UserEntity userEntity = userRepository.findById(id).orElseThrow(
+                () -> new UsernameNotFoundException("Specified user is not found!"));
+
+        if(((userEntity.getCommentVisible() == CommentVisible.FRIEND_VISION && !chatRoomRepository.existsBySenderIdOrRecipientId(userId, id)) ||
+                (userEntity.getCommentVisible() == CommentVisible.EXCLUSION_VISION && !exclusionCommentRepository.existsByUserIdAndExclusionId(id, userId)) ||
+                (userEntity.getCommentVisible() == CommentVisible.NO_VISION)) && !userId.equals(id))
+            return new ResponseEntity("Comments close!", HttpStatus.BAD_REQUEST);
+
+        CommentsEntity commentsEntity = new CommentsEntity();
+        commentsEntity.setComment(commentBody.getComment());
+        commentsEntity.setAuthorId(userId);
+        commentsEntity.setUserId(id);
+
+        commentsRepository.save(commentsEntity);
+        return new ResponseEntity("Your comment is send", HttpStatus.OK);
+    }
 }

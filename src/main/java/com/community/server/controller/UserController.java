@@ -1,28 +1,22 @@
 package com.community.server.controller;
 
 import com.community.server.entity.UserEntity;
+import com.community.server.enums.ProfileStatisticVisible;
+import com.community.server.enums.UserStatus;
 import com.community.server.mapper.SearchUserMapper;
-import com.community.server.mapper.SettingsUserMapper;
-import com.community.server.repository.BlackListRepository;
-import com.community.server.repository.FileRepository;
-import com.community.server.repository.UserRepository;
+import com.community.server.repository.*;
 import com.community.server.security.JwtAuthenticationFilter;
 import com.community.server.security.JwtTokenProvider;
-import com.community.server.service.MailService;
-import com.community.server.service.UserService;
 import com.community.server.dto.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.net.UnknownHostException;
 
 @RestController
 @RequestMapping("/api/user")
@@ -35,6 +29,12 @@ public class UserController {
 
     @Autowired
     private BlackListRepository blackListRepository;
+
+    @Autowired
+    private ChatRoomRepository chatRoomRepository;
+
+    @Autowired
+    private InviteRepository inviteRepository;
 
     @Autowired
     private SearchUserMapper searchUserMapper;
@@ -51,16 +51,31 @@ public class UserController {
         String jwt = jwtAuthenticationFilter.getJwtFromRequest(request);
         Long userId = tokenProvider.getUserIdFromJWT(jwt);
 
-        UserEntity userEntity = userRepository.findById(userId).orElseThrow(
-                () -> new UsernameNotFoundException("User is not found!"));
+        if(!userRepository.existsById(userId))
+            return new UsernameNotFoundException("User is not found!");
 
-        UserEntity findUserEntity = userRepository.findById(id).orElseThrow(
+        UserEntity userEntity = userRepository.findById(id).orElseThrow(
                 () -> new UsernameNotFoundException("Find user is not found!"));
 
         if(blackListRepository.existsByUserIdAndBanId(id, userId))
             return new ResponseEntity("You are blacklisted!", HttpStatus.BAD_REQUEST);
 
-        return searchUserMapper.toModel(findUserEntity);
+        UserSearch userSearch = searchUserMapper.toModel(userEntity);
+
+        if((userEntity.getVisibleMyChats() == ProfileStatisticVisible.MY_CHATS_VISION && chatRoomRepository.existsBySenderIdOrRecipientId(userId, id)) ||
+                (userEntity.getVisibleMyChats() == ProfileStatisticVisible.ALL_VISION) || userId == id)
+            userSearch.setCountChats(chatRoomRepository.countBySenderIdOrRecipientId(id, id));
+
+        if((userEntity.getVisibleMyInvite() == ProfileStatisticVisible.MY_CHATS_VISION && chatRoomRepository.existsBySenderIdOrRecipientId(userId, id)) ||
+                (userEntity.getVisibleMyInvite() == ProfileStatisticVisible.ALL_VISION) || userId == id)
+            userSearch.setCountInvite(inviteRepository.countByUserId(id));
+
+        if(userId != id)
+            userSearch.setUserStatus(
+                    chatRoomRepository.existsBySenderIdOrRecipientId(userId, id) ? UserStatus.HAVE_CHAT :
+                            inviteRepository.existsByUserIdAndInviteId(id, userId) ? UserStatus.YOU_WAIT_ACCEPT :
+                                    inviteRepository.existsByUserIdAndInviteId(userId, id) ? UserStatus.HE_WAIT_ACCEPT : UserStatus.NO_FRIEND);
+        return userSearch;
     }/*
 
     @GetMapping("/{username}")

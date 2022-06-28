@@ -92,9 +92,10 @@ public class UserEntity {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<RoleEntity> roles = new HashSet<>();
 
+    private Boolean messagesInviteOnly = Boolean.FALSE;
+
     private ProfileStatisticVisible visibleMyChats = ProfileStatisticVisible.ALL_VISION;
     private ProfileStatisticVisible visibleMyInvite = ProfileStatisticVisible.ALL_VISION;
-    private ProfileStatisticVisible visibleMyLike = ProfileStatisticVisible.ALL_VISION;
 
     public UserEntity() {}
 

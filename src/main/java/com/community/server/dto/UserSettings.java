@@ -19,6 +19,5 @@ public class UserSettings {
     private String contactEmail;
     private String contactPhone;
     private String fileNameAvatar;
-    //private Boolean closeComment;
     private Date createDate;
 }

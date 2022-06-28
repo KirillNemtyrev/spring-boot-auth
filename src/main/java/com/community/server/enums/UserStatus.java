@@ -2,6 +2,6 @@ package com.community.server.enums;
 
 public enum UserStatus {
 
-    BLACKLIST, WAIT_ACCEPT, HAVE_CHAT, NO_FRIEND
+    HE_WAIT_ACCEPT, YOU_WAIT_ACCEPT, HAVE_CHAT, NO_FRIEND
 
 }
