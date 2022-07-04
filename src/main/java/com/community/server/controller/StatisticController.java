@@ -12,6 +12,8 @@ import com.community.server.repository.ChatRoomRepository;
 import com.community.server.repository.UserRepository;
 import com.community.server.security.JwtAuthenticationFilter;
 import com.community.server.security.JwtTokenProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,6 +46,8 @@ public class StatisticController {
     @Autowired
     private JwtTokenProvider tokenProvider;
 
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+
     @GetMapping("/chats/id{id}")
     public Object getChatsElement(HttpServletRequest request, @PathVariable Long id) {
 
@@ -61,21 +65,21 @@ public class StatisticController {
             return new ResponseEntity("This element statistic close!", HttpStatus.BAD_REQUEST);
 
         // Variables
-        List<ChatRoomEntity> chatRoomEntities = chatRoomRepository.findBySenderIdOrRecipientId(userId, userId);
+        List<ChatRoomEntity> chatRoomEntities = chatRoomRepository.findBySenderIdOrRecipientId(id, id);
         List<ProfileStatistic> profileStatisticList = new ArrayList<>(chatRoomEntities.size());
 
         for (ChatRoomEntity chatRoomEntity : chatRoomEntities) {
 
             UserEntity user =
-                    userRepository.findById(userEntity.getId() == chatRoomEntity.getSenderId() ? chatRoomEntity.getRecipientId() : chatRoomEntity.getSenderId()).orElseThrow(
+                    userRepository.findById(userEntity.getId().equals(chatRoomEntity.getSenderId()) ? chatRoomEntity.getRecipientId() : chatRoomEntity.getSenderId()).orElseThrow(
                             () -> new UsernameNotFoundException("Not found user!"));
 
-            if((userId.equals(chatRoomEntity.getSenderId()) && chatRoomEntity.getChatRoomVisible() == ChatRoomVisible.RECIPIENT_VISION) ||
-                    (userId.equals(chatRoomEntity.getRecipientId()) && chatRoomEntity.getChatRoomVisible() == ChatRoomVisible.SENDER_VISION) ||
+            if((user.getId().equals(chatRoomEntity.getSenderId()) && chatRoomEntity.getChatRoomVisible() == ChatRoomVisible.RECIPIENT_VISION) ||
+                    (user.getId().equals(chatRoomEntity.getRecipientId()) && chatRoomEntity.getChatRoomVisible() == ChatRoomVisible.SENDER_VISION) ||
                     chatRoomEntity.getChatRoomVisible() == ChatRoomVisible.NO_VISION) continue;
 
             ProfileStatistic profileStatistic = new ProfileStatistic(
-                    userId.equals(chatRoomEntity.getSenderId()) ? chatRoomEntity.getRecipientId() : chatRoomEntity.getSenderId(),
+                    id.equals(chatRoomEntity.getSenderId()) ? chatRoomEntity.getRecipientId() : chatRoomEntity.getSenderId(),
                     user.getUsername(),
                     user.getName(),
                     user.getFileNameAvatar());

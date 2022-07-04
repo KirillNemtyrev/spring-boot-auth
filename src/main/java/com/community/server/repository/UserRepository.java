@@ -12,7 +12,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     Optional<UserEntity> findByEmail(String email);
     Optional<UserEntity> findByUsernameOrEmail(String username, String email);
-    List<UserEntity> findByUsernameContainingIgnoreCase(String name);
+    List<UserEntity> findByUsernameContainingIgnoreCaseOrNameContainingIgnoreCase(String username, String name);
     List<UserEntity> findByIdIn(List<Long> userIds);
     Optional<UserEntity> findByUsername(String username);
 

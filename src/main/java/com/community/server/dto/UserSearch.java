@@ -19,6 +19,7 @@ public class UserSearch {
     private String contactPhone;
 
     private Boolean messagesInviteOnly;
+    private Boolean inBlackList = Boolean.FALSE;
 
     @Nullable
     private UserStatus userStatus;

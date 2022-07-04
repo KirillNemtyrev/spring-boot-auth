@@ -65,8 +65,8 @@ public class BlackListController {
         return blackList;
     }
 
-    @PostMapping()
-    public ResponseEntity<?> addBlackList(HttpServletRequest request, @PathVariable String username) {
+    @PostMapping("id{id}")
+    public ResponseEntity<?> addBlackList(HttpServletRequest request, @PathVariable Long id) {
 
         String jwt = jwtAuthenticationFilter.getJwtFromRequest(request);
         Long userId = tokenProvider.getUserIdFromJWT(jwt);
@@ -74,7 +74,7 @@ public class BlackListController {
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(
                 () -> new UsernameNotFoundException("User is not found!"));
 
-        UserEntity findUserEntity = userRepository.findByUsername(username).orElseThrow(
+        UserEntity findUserEntity = userRepository.findById(id).orElseThrow(
                 () -> new UsernameNotFoundException("Find user is not found!"));
 
         if(blackListRepository.existsByUserIdAndBanId(userEntity.getId(), findUserEntity.getId()))
@@ -86,7 +86,7 @@ public class BlackListController {
         return new ResponseEntity("The user has been blacklisted!", HttpStatus.OK);
     }
 
-    @DeleteMapping()
+    @DeleteMapping("id{id}")
     public ResponseEntity<?> deleteBlackList(HttpServletRequest request, @PathVariable Long id) {
 
         String jwt = jwtAuthenticationFilter.getJwtFromRequest(request);

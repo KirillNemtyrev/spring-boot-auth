@@ -3,7 +3,7 @@ package com.community.server.body;
 import lombok.Getter;
 
 @Getter
-public class Security {
+public class SecurityBody {
     private String oldPassword;
     private String newPassword;
     private String oldEmail;
