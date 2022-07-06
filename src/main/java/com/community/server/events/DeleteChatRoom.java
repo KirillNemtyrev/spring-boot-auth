@@ -5,12 +5,12 @@ import lombok.Getter;
 
 @Getter
 public class DeleteChatRoom {
-    private final EventType eventType = EventType.DELETE_CHAT_ROOM;
-    private Long id;
+    private final EventType event = EventType.DELETE_CHAT_ROOM;
+    private Long chatId;
 
     public DeleteChatRoom() {}
 
-    public DeleteChatRoom(Long id) {
-        this.id = id;
+    public DeleteChatRoom(Long chatId) {
+        this.chatId = chatId;
     }
 }

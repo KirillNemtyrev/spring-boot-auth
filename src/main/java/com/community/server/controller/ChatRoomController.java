@@ -98,7 +98,7 @@ public class ChatRoomController {
                 everyone ? ChatRoomVisible.NO_VISION :
                         userId.equals(chatRoom.getSenderId()) ? ChatRoomVisible.RECIPIENT_VISION : ChatRoomVisible.SENDER_VISION);
 
-        messagingTemplate.convertAndSendToUser(userEntity.getUuid(),"/queue/events", new DeleteChatRoom(chatRoom.getId()));
+        messagingTemplate.convertAndSendToUser(userEntity.getUuid(),"/events", new DeleteChatRoom(chatRoom.getId()));
 
         chatRoomRepository.save(chatRoom);
         return new ResponseEntity("The chat room has been deleted!", HttpStatus.OK);
