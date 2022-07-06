@@ -4,20 +4,14 @@ import com.community.server.dto.BlackList;
 import com.community.server.entity.BlackListEntity;
 import com.community.server.entity.UserEntity;
 import com.community.server.mapper.BlackListMapper;
-import com.community.server.mapper.SettingsUserMapper;
 import com.community.server.repository.BlackListRepository;
-import com.community.server.repository.FileRepository;
 import com.community.server.repository.UserRepository;
 import com.community.server.security.JwtAuthenticationFilter;
 import com.community.server.security.JwtTokenProvider;
-import com.community.server.service.MailService;
-import com.community.server.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -65,7 +59,25 @@ public class BlackListController {
         return blackList;
     }
 
-    @PostMapping("id{id}")
+    @GetMapping("/id{id}")
+    public Object getUserInBlacklist(HttpServletRequest request, @PathVariable Long id){
+
+        String jwt = jwtAuthenticationFilter.getJwtFromRequest(request);
+        Long userId = tokenProvider.getUserIdFromJWT(jwt);
+
+        if(!userRepository.existsById(id))
+            return new UsernameNotFoundException("User is not found!");
+
+        if(!userRepository.existsById(id))
+            return new UsernameNotFoundException("Find user is not found!");
+
+        if(blackListRepository.existsByUserIdAndBanId(userId, id))
+            return new ResponseEntity("The user is already blacklisted!", HttpStatus.NOT_FOUND);
+
+        return new ResponseEntity("The user is not blacklisted!", HttpStatus.OK);
+    }
+
+    @PostMapping("/id{id}")
     public ResponseEntity<?> addBlackList(HttpServletRequest request, @PathVariable Long id) {
 
         String jwt = jwtAuthenticationFilter.getJwtFromRequest(request);
@@ -86,7 +98,7 @@ public class BlackListController {
         return new ResponseEntity("The user has been blacklisted!", HttpStatus.OK);
     }
 
-    @DeleteMapping("id{id}")
+    @DeleteMapping("/id{id}")
     public ResponseEntity<?> deleteBlackList(HttpServletRequest request, @PathVariable Long id) {
 
         String jwt = jwtAuthenticationFilter.getJwtFromRequest(request);

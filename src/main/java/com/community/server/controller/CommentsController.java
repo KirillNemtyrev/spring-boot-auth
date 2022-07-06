@@ -5,6 +5,7 @@ import com.community.server.dto.Comment;
 import com.community.server.entity.CommentsEntity;
 import com.community.server.entity.UserEntity;
 import com.community.server.enums.CommentVisible;
+import com.community.server.exception.BadRequestException;
 import com.community.server.repository.*;
 import com.community.server.security.JwtAuthenticationFilter;
 import com.community.server.security.JwtTokenProvider;
@@ -79,7 +80,7 @@ public class CommentsController {
             commentList.add(new Comment(
                     commentsEntity.getId(), authorEntity.getId(), authorEntity.getName(),
                     authorEntity.getUsername(), authorEntity.getFileNameAvatar(),
-                    commentsEntity.getComment(), commentsEntity.getCreateDate())
+                    commentsEntity.getComment(), (authorEntity.getId().equals(userId) || userId.equals(id)), commentsEntity.getCreateDate())
             );
         }
 
@@ -113,5 +114,23 @@ public class CommentsController {
 
         commentsRepository.save(commentsEntity);
         return new ResponseEntity("Your comment is send", HttpStatus.OK);
+    }
+
+    @DeleteMapping("/commentId{commentId}")
+    public Object deleteComment(HttpServletRequest request, @PathVariable Long commentId){
+        String jwt = jwtAuthenticationFilter.getJwtFromRequest(request);
+        Long userId = tokenProvider.getUserIdFromJWT(jwt);
+
+        if(!userRepository.existsById(userId))
+            return new UsernameNotFoundException("User is not found!");
+
+        CommentsEntity commentsEntity = commentsRepository.findById(commentId).orElseThrow(
+                () -> new BadRequestException("Comment not Found"));
+
+        if(!commentsEntity.getAuthorId().equals(userId) && !commentsEntity.getUserId().equals(userId))
+            return new BadRequestException("You do not have access to interact with this comment!");
+
+        commentsRepository.delete(commentsEntity);
+        return new ResponseEntity("Comment deleted", HttpStatus.OK);
     }
 }

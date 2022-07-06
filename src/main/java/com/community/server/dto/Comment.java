@@ -15,5 +15,6 @@ public class Comment {
     private String authorUsername;
     private String authorFileNameAvatar;
     private String comment;
+    private Boolean accessForRemove;
     private Date date;
 }
