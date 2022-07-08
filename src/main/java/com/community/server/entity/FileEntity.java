@@ -31,6 +31,8 @@ public class FileEntity {
 
     private TypeFile typeFile;
 
+    public FileEntity(){}
+
     public FileEntity(String file, Long author, Date created, TypeFile typeFile) {
         this.file = file;
         this.author = author;

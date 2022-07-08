@@ -2,15 +2,19 @@ package com.community.server.controller;
 
 import com.community.server.dto.ChatRoom;
 import com.community.server.entity.ChatRoomEntity;
+import com.community.server.entity.MessageEntity;
 import com.community.server.entity.UserEntity;
 import com.community.server.enums.ChatRoomVisible;
 import com.community.server.events.DeleteChatRoom;
 import com.community.server.exception.AppException;
 import com.community.server.repository.BlackListRepository;
 import com.community.server.repository.ChatRoomRepository;
+import com.community.server.repository.MessageRepository;
 import com.community.server.repository.UserRepository;
 import com.community.server.security.JwtAuthenticationFilter;
 import com.community.server.security.JwtTokenProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +37,7 @@ public class ChatRoomController {
     private UserRepository userRepository;
 
     @Autowired
-    private BlackListRepository blackListRepository;
+    private MessageRepository messageRepository;
 
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -60,8 +64,10 @@ public class ChatRoomController {
         for (ChatRoomEntity chatRoomEntity : chatRoomEntities) {
 
             UserEntity userEntity =
-                    userRepository.findById(userId == chatRoomEntity.getSenderId() ? chatRoomEntity.getRecipientId() : chatRoomEntity.getSenderId()).orElseThrow(
+                    userRepository.findById(userId.equals(chatRoomEntity.getSenderId()) ? chatRoomEntity.getRecipientId() : chatRoomEntity.getSenderId()).orElseThrow(
                             () -> new UsernameNotFoundException("Not found user!"));
+
+            MessageEntity messageEntity = messageRepository.findFirstById(chatRoomEntity.getId()).orElseThrow();
 
             if((userId.equals(chatRoomEntity.getSenderId()) && chatRoomEntity.getChatRoomVisible() == ChatRoomVisible.RECIPIENT_VISION) ||
                     (userId.equals(chatRoomEntity.getRecipientId()) && chatRoomEntity.getChatRoomVisible() == ChatRoomVisible.SENDER_VISION) ||
@@ -72,7 +78,10 @@ public class ChatRoomController {
                     (userId.equals(chatRoomEntity.getSenderId())) ? chatRoomEntity.getRecipientId() : chatRoomEntity.getSenderId(),
                     userEntity.getUsername(),
                     userEntity.getName(),
-                    userEntity.getFileNameAvatar());
+                    userEntity.getFileNameAvatar(),
+                    messageEntity.getText(),
+                    messageEntity.getSendDate().getTime(),
+                    chatRoomEntity.getCountNewMessage());
 
             chatRoomList.add(chatRoom);
         }

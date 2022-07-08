@@ -16,8 +16,6 @@ public class UserSettings {
     private String uuid;
     private String email;
     private String aboutMe;
-    private String contactEmail;
-    private String contactPhone;
     private String fileNameAvatar;
     private Date createDate;
 }

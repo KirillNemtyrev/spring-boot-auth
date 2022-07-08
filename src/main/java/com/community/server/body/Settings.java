@@ -15,7 +15,4 @@ public class Settings {
 
     @Size(max=70)
     private String aboutMe;
-
-    private String contactEmail;
-    private String contactPhone;
 }

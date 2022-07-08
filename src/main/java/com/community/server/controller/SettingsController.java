@@ -41,7 +41,15 @@ public class SettingsController {
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(
                 () -> new UsernameNotFoundException("User is not found!"));
 
-        return settingsUserMapper.toModel(userEntity);
+        return new UserSettings(
+                userEntity.getId(),
+                userEntity.getName(),
+                userEntity.getUsername(),
+                userEntity.getUuid(),
+                userEntity.getEmail(),
+                userEntity.getAboutMe(),
+                userEntity.getFileNameAvatar(),
+                userEntity.getCreateDate());
     }
 
     @PatchMapping("/username")
@@ -96,35 +104,5 @@ public class SettingsController {
 
         userRepository.save(userEntity);
         return new ResponseEntity("The 'aboutMe' field has been updated!", HttpStatus.OK);
-    }
-
-    @PatchMapping("/contact/email")
-    public ResponseEntity<?> patchContactEmail(HttpServletRequest request, @Valid @RequestBody Settings settings) {
-
-        String jwt = jwtAuthenticationFilter.getJwtFromRequest(request);
-        Long userId = tokenProvider.getUserIdFromJWT(jwt);
-
-        UserEntity userEntity = userRepository.findById(userId).orElseThrow(
-                () -> new UsernameNotFoundException("User is not found!"));
-
-        userEntity.setContactEmail(settings.getContactEmail());
-        userRepository.save(userEntity);
-
-        return new ResponseEntity("The 'contactEmail' field has been updated!", HttpStatus.OK);
-    }
-
-    @PatchMapping("/contact/phone")
-    public ResponseEntity<?> patchContactPhone(HttpServletRequest request, @Valid @RequestBody Settings settings) {
-
-        String jwt = jwtAuthenticationFilter.getJwtFromRequest(request);
-        Long userId = tokenProvider.getUserIdFromJWT(jwt);
-
-        UserEntity userEntity = userRepository.findById(userId).orElseThrow(
-                () -> new UsernameNotFoundException("User is not found!"));
-
-        userEntity.setContactPhone(settings.getContactPhone());
-        userRepository.save(userEntity);
-
-        return new ResponseEntity("The 'contactPhone' field has been updated!", HttpStatus.OK);
     }
 }

@@ -73,13 +73,13 @@ public class AvatarController {
         if(directory.mkdir()) logger.info("The avatar directory has been created!");
 
         String fileName = UUID.randomUUID().toString() + "." + suffix;
-        String pathTofile = "resources/"+ fileName;
-        File photo = new File(pathTofile);
+        String pathToFile = "resources/"+ fileName;
+        File photo = new File(pathToFile);
 
         if(photo.createNewFile()) logger.info("The avatar file has been created!");
 
         byte[] bytes = file.getBytes();
-        BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(pathTofile));
+        BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(pathToFile));
         stream.write(bytes);
         stream.close();
 

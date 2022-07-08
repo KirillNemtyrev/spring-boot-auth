@@ -64,7 +64,13 @@ public class UserController {
         if(blackListRepository.existsByUserIdAndBanId(id, userId))
             return new ResponseEntity("You are blacklisted!", HttpStatus.BAD_REQUEST);
 
-        UserSearch userSearch = searchUserMapper.toModel(userEntity);
+        UserSearch userSearch = new UserSearch(
+                userEntity.getId(),
+                userEntity.getName(),
+                userEntity.getUsername(),
+                userEntity.getAboutMe(),
+                userEntity.getFileNameAvatar()
+        );
         userSearch.setCountChats(chatRoomRepository.countBySenderIdOrRecipientId(id, id));
         userSearch.setCountInvite(inviteRepository.countByUserId(id));
 
@@ -105,7 +111,13 @@ public class UserController {
             if(userEntity.getId() == userId || blackListRepository.existsByUserIdAndBanId(userEntity.getId(), userId))
                 continue;
 
-            UserSearch userSearch = searchUserMapper.toModel(userEntity);
+            UserSearch userSearch = new UserSearch(
+                    userEntity.getId(),
+                    userEntity.getName(),
+                    userEntity.getUsername(),
+                    userEntity.getAboutMe(),
+                    userEntity.getFileNameAvatar()
+            );
             userSearch.setCountChats(chatRoomRepository.countBySenderIdOrRecipientId(userEntity.getId(), userEntity.getId()));
             userSearch.setCountInvite(inviteRepository.countByUserId(userEntity.getId()));
 

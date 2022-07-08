@@ -32,8 +32,7 @@ public class ChatRoomEntity {
     @CreatedDate
     private Date createdDate = new Date();
 
-    @LastModifiedDate
-    private Date lastMessage = new Date();
+    private int countNewMessage = 0;
 
     public ChatRoomEntity() {}
 

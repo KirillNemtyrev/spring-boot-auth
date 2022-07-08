@@ -60,12 +60,6 @@ public class UserEntity {
     @Size(max = 70)
     private String aboutMe;
 
-    @Size(max = 40)
-    private String contactEmail;
-
-    @Size(max = 12)
-    private String contactPhone;
-
     @NotBlank
     private String fileNameAvatar = "no_avatar.jpg";
 
