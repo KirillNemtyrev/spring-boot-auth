@@ -11,5 +11,5 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
     List<MessageEntity> findByChatId(Long chatId);
 
     Optional<MessageEntity> findById(Long id);
-    Optional<MessageEntity> findFirstById(Long id);
+    Optional<MessageEntity> findFirstByChatIdOrderByIdDesc(Long id);
 }

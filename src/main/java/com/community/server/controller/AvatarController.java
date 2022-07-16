@@ -3,22 +3,17 @@ package com.community.server.controller;
 import com.community.server.entity.FileEntity;
 import com.community.server.entity.UserEntity;
 import com.community.server.enums.TypeFile;
-import com.community.server.events.NewAvatar;
-import com.community.server.mapper.SettingsUserMapper;
-import com.community.server.repository.BlackListRepository;
 import com.community.server.repository.FileRepository;
 import com.community.server.repository.UserRepository;
 import com.community.server.security.JwtAuthenticationFilter;
 import com.community.server.security.JwtTokenProvider;
-import com.community.server.service.MailService;
-import com.community.server.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -89,8 +84,6 @@ public class AvatarController {
 
         fileRepository.save(fileEntity);
         userRepository.save(userEntity);
-
-        messagingTemplate.convertAndSendToUser(userEntity.getUuid(),"/queue/events", new NewAvatar(fileName));
         return new ResponseEntity("User photo changed!", HttpStatus.OK);
     }
 }

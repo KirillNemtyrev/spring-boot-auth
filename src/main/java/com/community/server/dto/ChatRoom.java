@@ -17,7 +17,8 @@ public class ChatRoom {
     private String name;
     private String fileNameAvatar;
 
+    private Long lastSenderId;
     private String lastMessage;
     private Long lastMessageDate;
-    private int countNewMessage;
+    private Long countNewMessage;
 }

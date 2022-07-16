@@ -67,7 +67,7 @@ public class ChatRoomController {
                     userRepository.findById(userId.equals(chatRoomEntity.getSenderId()) ? chatRoomEntity.getRecipientId() : chatRoomEntity.getSenderId()).orElseThrow(
                             () -> new UsernameNotFoundException("Not found user!"));
 
-            MessageEntity messageEntity = messageRepository.findFirstById(chatRoomEntity.getId()).orElseThrow();
+            MessageEntity messageEntity = messageRepository.findFirstByChatIdOrderByIdDesc(chatRoomEntity.getId()).orElse(null);
 
             if((userId.equals(chatRoomEntity.getSenderId()) && chatRoomEntity.getChatRoomVisible() == ChatRoomVisible.RECIPIENT_VISION) ||
                     (userId.equals(chatRoomEntity.getRecipientId()) && chatRoomEntity.getChatRoomVisible() == ChatRoomVisible.SENDER_VISION) ||
@@ -79,9 +79,10 @@ public class ChatRoomController {
                     userEntity.getUsername(),
                     userEntity.getName(),
                     userEntity.getFileNameAvatar(),
-                    messageEntity.getText(),
-                    messageEntity.getSendDate().getTime(),
-                    chatRoomEntity.getCountNewMessage());
+                    messageEntity != null ? messageEntity.getSenderId() : null,
+                    messageEntity != null ? messageEntity.getText() : "",
+                    messageEntity != null ? messageEntity.getSendDate().getTime() : chatRoomEntity.getCreatedDate().getTime(),
+                    messageEntity != null ? messageEntity.getSenderId().equals(userId) ? 0 : chatRoomEntity.getCountNewMessage() : null);
 
             chatRoomList.add(chatRoom);
         }
@@ -111,5 +112,30 @@ public class ChatRoomController {
 
         chatRoomRepository.save(chatRoom);
         return new ResponseEntity("The chat room has been deleted!", HttpStatus.OK);
+    }
+
+    @DeleteMapping("/counter/id{id}")
+    public Object resetCounter(HttpServletRequest request, @PathVariable Long id){
+
+        String jwt = jwtAuthenticationFilter.getJwtFromRequest(request);
+        Long userId = tokenProvider.getUserIdFromJWT(jwt);
+
+        if(!userRepository.existsById(userId))
+            return new UsernameNotFoundException("User is not found!");
+
+        ChatRoomEntity chatRoom = chatRoomRepository.findById(id).orElseThrow(
+                () -> new AppException("Chat room not found!"));
+
+        if(!Objects.equals(chatRoom.getSenderId(), userId) && !Objects.equals(chatRoom.getRecipientId(), userId))
+            return new ResponseEntity("Chat room not found!", HttpStatus.BAD_REQUEST);
+
+        MessageEntity messageEntity = messageRepository.findFirstByChatIdOrderByIdDesc(chatRoom.getId()).orElse(null);
+
+        if(messageEntity == null || messageEntity.getSenderId().equals(userId))
+            return new ResponseEntity("The message counter is already empty!", HttpStatus.BAD_REQUEST);
+
+        chatRoom.setCountNewMessage(0L);
+        chatRoomRepository.save(chatRoom);
+        return new ResponseEntity("The message counter has been reset!", HttpStatus.OK);
     }
 }

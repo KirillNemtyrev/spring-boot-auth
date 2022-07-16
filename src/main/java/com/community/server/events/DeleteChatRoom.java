@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 public class DeleteChatRoom {
-    private final EventType event = EventType.DELETE_CHAT_ROOM;
+    private final int event = EventType.DELETE_CHAT_ROOM.ordinal();
     private Long chatId;
 
     public DeleteChatRoom() {}
