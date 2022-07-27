@@ -1,9 +1,6 @@
 package com.community.server.controller;
 
-import com.community.server.entity.FileEntity;
 import com.community.server.entity.UserEntity;
-import com.community.server.enums.TypeFile;
-import com.community.server.repository.FileRepository;
 import com.community.server.repository.UserRepository;
 import com.community.server.security.JwtAuthenticationFilter;
 import com.community.server.security.JwtTokenProvider;
@@ -25,7 +22,6 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Date;
 import java.util.UUID;
 
 @RestController
@@ -39,9 +35,6 @@ public class AvatarController {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private FileRepository fileRepository;
 
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -79,10 +72,6 @@ public class AvatarController {
         stream.close();
 
         userEntity.setFileNameAvatar(fileName);
-
-        FileEntity fileEntity = new FileEntity(fileName, userEntity.getId(), new Date(), TypeFile.FILE_AVATAR);
-
-        fileRepository.save(fileEntity);
         userRepository.save(userEntity);
         return new ResponseEntity("User photo changed!", HttpStatus.OK);
     }

@@ -8,6 +8,6 @@ import javax.validation.constraints.Email;
 public class SignIN {
 
     @Email
-    private String email;
+    private String UsernameOremail;
     private String password;
 }

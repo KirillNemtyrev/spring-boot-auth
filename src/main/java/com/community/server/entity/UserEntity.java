@@ -1,16 +1,15 @@
 package com.community.server.entity;
 
-import com.community.server.enums.CommentVisible;
-import com.community.server.enums.ProfileStatisticVisible;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.NaturalId;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
-import javax.validation.constraints.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -49,30 +48,8 @@ public class UserEntity {
     @Size(max = 100)
     private String password;
 
-    @Nullable
-    @Size(max = 6)
-    private String recoveryCode;
-
-    @Nullable
-    @Size(max = 6)
-    private String emailCode;
-
-    @Size(max = 70)
-    private String aboutMe;
-
     @NotBlank
     private String fileNameAvatar = "no_avatar.jpg";
-
-    @NotBlank
-    private String registerIP;
-
-    private CommentVisible commentVisible = CommentVisible.ALL_VISION;
-
-    @Nullable
-    private Date recoveryDate;
-
-    @Nullable
-    private Date emailDate;
 
     @CreatedDate
     private Date createDate = new Date();
@@ -85,11 +62,6 @@ public class UserEntity {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<RoleEntity> roles = new HashSet<>();
-
-    private Boolean messagesInviteOnly = Boolean.FALSE;
-
-    private ProfileStatisticVisible visibleMyChats = ProfileStatisticVisible.ALL_VISION;
-    private ProfileStatisticVisible visibleMyInvite = ProfileStatisticVisible.ALL_VISION;
 
     public UserEntity() {}
 
